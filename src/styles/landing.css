@@ -1141,7 +1141,17 @@
 .footer {
   background: var(--ivory);
   border-top: 1px solid var(--line);
-  padding: 40px 0 28px;
+  padding: 40px 0 14px;
+}
+
+.footer__credit {
+  margin-top: 30px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.footer__credit .site-credit {
+  padding: 0;
 }
 
 .footer__inner {

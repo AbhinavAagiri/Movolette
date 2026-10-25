@@ -535,6 +535,35 @@ svg {
   flex-direction: column;
 }
 
+/* ---------- Site credit ---------- */
+
+/*
+ * One centred credit line closes every page. It carries the same monospace
+ * label voice as the rest of the interface, so it reads as a signature rather
+ * than a second footer.
+ */
+.site-credit {
+  display: flex;
+  justify-content: center;
+  padding: 10px 16px;
+  text-align: center;
+}
+
+.site-credit a {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 4px 2px;
+  transition: color 160ms ease;
+}
+
+.site-credit a:hover,
+.site-credit a:focus-visible {
+  color: var(--violet);
+}
+
 /* ---------- Reveal ---------- */
 
 /*

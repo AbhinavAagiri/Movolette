@@ -1,6 +1,7 @@
 import { studioHash } from '../../lib/router';
 import { Wordmark } from '../Mark';
 import { Reveal } from '../Reveal';
+import { SiteCredit } from '../SiteCredit';
 
 export function FinalCta() {
   return (
@@ -57,6 +58,9 @@ export function FinalCta() {
             <span className="mono">SAVED LOCALLY · NO ACCOUNT</span>
             <span className="mono">© 2026 MOVOLETTE</span>
           </Reveal>
+        </div>
+        <div className="container footer__credit">
+          <SiteCredit />
         </div>
       </footer>
     </>

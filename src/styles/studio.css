@@ -7,6 +7,23 @@
   background: var(--ivory);
 }
 
+/* The credit closes the studio at the bottom of the viewport, like a signature
+   on the page rather than a panel. */
+.studio-credit {
+  flex: none;
+  border-top: 1px solid var(--line);
+  background: var(--paper);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.studio-credit .site-credit {
+  padding: 5px 16px;
+}
+
+.studio-credit .site-credit a {
+  padding: 2px;
+}
+
 .studio-bar {
   flex: none;
   height: var(--studio-bar-h);
@@ -1459,7 +1476,6 @@
     display: flex;
     border-top: 1px solid var(--line);
     background: var(--paper);
-    padding-bottom: env(safe-area-inset-bottom);
     z-index: 50;
   }
 

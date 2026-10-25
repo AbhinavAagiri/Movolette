@@ -33,6 +33,7 @@ import { PreviewFrame } from '../components/PreviewFrame';
 import { ExportPanel } from '../components/studio/ExportPanel';
 import { ShareDialog } from '../components/studio/ShareDialog';
 import { ThemeToggle } from '../components/ThemeToggle';
+import { SiteCredit } from '../components/SiteCredit';
 import { useToast } from '../components/Toast';
 import type { SavedDocument } from '../lib/storage';
 
@@ -482,6 +483,10 @@ export function Studio({ search }: { search: URLSearchParams }) {
           </button>
         ))}
       </nav>
+
+      <div className="studio-credit">
+        <SiteCredit />
+      </div>
 
       <ExportPanel open={exportOpen} onClose={() => setExportOpen(false)} doc={doc} />
       <ShareDialog open={shareOpen} onClose={() => setShareOpen(false)} doc={doc} />
