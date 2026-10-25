@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Movolette</title>
+    <meta
+      name="description"
+      content="Movolette is a browser animation studio for interface motion. Tune every movement, watch it live, and export production-ready HTML, CSS and JavaScript. No account required."
+    />
+    <meta name="theme-color" content="#171715" />
+    <meta property="og:title" content="Movolette — make every interaction feel alive" />
+    <meta
+      property="og:description"
+      content="Create beautiful UI animations, fine-tune every movement, and export production-ready code."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/instrument-serif.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/instrument-sans.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/spline-mono.woff2" as="font" type="font/woff2" crossorigin />
+    <style>
+      html {
+        background: #171715;
+      }
+      html[data-theme='light'] {
+        background: #f7f6f2;
+      }
+    </style>
+    <script>
+      (function () {
+        var theme = 'dark';
+        try {
+          if (window.localStorage.getItem('movolette.theme.v1') === 'light') theme = 'light';
+        } catch (error) {
+          /* Storage can be unavailable; dark is still the default. */
+        }
+        document.documentElement.dataset.theme = theme;
+        document.documentElement.style.colorScheme = theme;
+        var color = theme === 'light' ? '#F7F6F2' : '#171715';
+        var meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute('content', color);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <noscript>Movolette is an interactive animation studio. Please enable JavaScript to use it.</noscript>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
