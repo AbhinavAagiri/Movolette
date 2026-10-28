@@ -3,6 +3,7 @@ import type { MouseEvent } from 'react';
 import { useRoute } from './lib/router';
 import { Landing } from './pages/Landing';
 import { Studio } from './pages/Studio';
+import { NotFound } from './pages/NotFound';
 import { ToastProvider } from './components/Toast';
 import { ThemeProvider } from './components/ThemeProvider';
 
@@ -11,6 +12,13 @@ export function App() {
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [route.name]);
+
+  // The studio and the 404 page own more specific titles; these are the two
+  // that would otherwise keep a stale name from the previous route.
+  useEffect(() => {
+    if (route.name === 'landing') document.title = 'Movolette';
+    else if (route.name === 'notFound') document.title = 'Page not found — Movolette';
   }, [route.name]);
 
   const skipToContent = (event: MouseEvent<HTMLAnchorElement>) => {
@@ -29,8 +37,10 @@ export function App() {
         </a>
         {route.name === 'landing' ? (
           <Landing />
-        ) : (
+        ) : route.name === 'studio' ? (
           <Studio key={route.search.toString()} search={route.search} />
+        ) : (
+          <NotFound />
         )}
       </ToastProvider>
     </ThemeProvider>

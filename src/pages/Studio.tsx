@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { CSSProperties } from 'react';
 import {
   decodeShare,
@@ -39,6 +39,9 @@ import type { SavedDocument } from '../lib/storage';
 
 type PreviewSize = 'fit' | 'desktop' | 'tablet' | 'mobile';
 type MobilePanel = 'library' | 'preview' | 'settings';
+
+/* Module-level so the memoised preview frame sees the same object each render. */
+const PREVIEW_STYLE: CSSProperties = { height: '100%' };
 
 const SIZES: { id: PreviewSize; label: string; width: number | null; title: string }[] = [
   { id: 'fit', label: 'FIT', width: null, title: 'Fit the canvas' },
@@ -147,16 +150,21 @@ export function Studio({ search }: { search: URLSearchParams }) {
     setReplayKey((value) => value + 1);
   };
 
-  const selectPreset = (presetId: string) => {
-    if (!isPresetId(presetId)) return;
-    if (presetId !== doc.presetId) {
-      setDoc(defaultDocument(presetId));
-      setReplayKey((value) => value + 1);
-      setSim('idle');
-    }
-    setMobilePanel('preview');
-    setSettingsOpen(false);
-  };
+  // Stable identity while a preset's settings change, so the library does not
+  // re-render on every slider movement.
+  const selectPreset = useCallback(
+    (presetId: string) => {
+      if (!isPresetId(presetId)) return;
+      if (presetId !== doc.presetId) {
+        setDoc(defaultDocument(presetId));
+        setReplayKey((value) => value + 1);
+        setSim('idle');
+      }
+      setMobilePanel('preview');
+      setSettingsOpen(false);
+    },
+    [doc.presetId],
+  );
 
   const updateParam = (key: string, value: ParamValue) => {
     setDoc((current) => ({ ...current, params: { ...current.params, [key]: value } }));
@@ -191,38 +199,50 @@ export function Studio({ search }: { search: URLSearchParams }) {
   const saveLocal = () => {
     const entry = saveDocumentLocally(doc);
     if (!entry) {
-      notify('Could not save locally. Browser storage may be unavailable.');
+      notify('Could not save locally. Browser storage may be unavailable.', 'error');
       return;
     }
     setSaves(loadSaves());
     notify('Saved in this browser');
   };
 
-  const loadSave = (save: SavedDocument) => {
-    const safe = sanitizeDocument(save.doc);
-    if (!safe) {
-      notify('That local save could not be read.');
-      return;
-    }
-    setDoc(safe);
-    setReplayKey((value) => value + 1);
-    setSim('idle');
-    setMobilePanel('preview');
-    notify(`Loaded ${save.name} from this browser`);
-  };
+  const loadSave = useCallback(
+    (save: SavedDocument) => {
+      const safe = sanitizeDocument(save.doc);
+      if (!safe) {
+        notify('That local save could not be read.', 'error');
+        return;
+      }
+      setDoc(safe);
+      setReplayKey((value) => value + 1);
+      setSim('idle');
+      setMobilePanel('preview');
+      notify(`Loaded ${save.name} from this browser`);
+    },
+    [notify],
+  );
 
-  const deleteSave = (presetId: string) => {
-    setSaves(removeSave(presetId));
-    notify('Local save removed');
-  };
+  const deleteSave = useCallback(
+    (presetId: string) => {
+      setSaves(removeSave(presetId));
+      notify('Local save removed');
+    },
+    [notify],
+  );
 
   const closeInspector = () => {
     setSettingsOpen(false);
     setMobilePanel('preview');
   };
 
-  // Export is computed again inside the panel, which reads from the same document.
-  const exportBundle = useMemo(() => buildExportBundle(doc), [doc]);
+  /*
+   * The export bundle builds a complete stylesheet. That is wasted work on
+   * every slider tick, so it is computed by the export panel when it opens.
+   * The footer label only needs to know whether the preset ships JavaScript,
+   * which is structural: the same preset exports the same formats whatever
+   * its parameters are.
+   */
+  const exportHasScript = useMemo(() => buildExportBundle(doc).js.length > 0, [doc.presetId]);
 
   return (
     <main className="studio" id="main-content" data-mobile={mobilePanel} tabIndex={-1}>
@@ -411,7 +431,7 @@ export function Studio({ search }: { search: URLSearchParams }) {
                   replayKey={replayKey}
                   sim={sim}
                   demo
-                  style={{ height: '100%' }}
+                  style={PREVIEW_STYLE}
                 />
               </div>
             </div>
@@ -430,7 +450,7 @@ export function Studio({ search }: { search: URLSearchParams }) {
             <div className="canvas-foot__meta">
               {sim !== 'idle' ? <span className="canvas-foot__sim mono">SIMULATING {sim.toUpperCase()}</span> : null}
               <button type="button" className="canvas-foot__export text-link" onClick={() => setExportOpen(true)}>
-                Export {exportBundle.js ? 'CSS, HTML & JS' : 'CSS & HTML'}
+                Export {exportHasScript ? 'CSS, HTML & JS' : 'CSS & HTML'}
               </button>
             </div>
           </div>

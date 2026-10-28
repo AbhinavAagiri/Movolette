@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { encodeDocument } from '../../lib/motion/documents';
 import { studioHash } from '../../lib/router';
 import type { StudioDocument } from '../../lib/motion/types';
@@ -17,6 +17,7 @@ export function ShareDialog({
 }) {
   const notify = useToast();
   const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<number | null>(null);
   const url = useMemo(() => {
     if (!open) return '';
     const token = encodeDocument(doc);
@@ -28,15 +29,22 @@ export function ShareDialog({
     if (open) setCopied(false);
   }, [open]);
 
+  useEffect(() => {
+    return () => {
+      if (copyTimer.current) window.clearTimeout(copyTimer.current);
+    };
+  }, []);
+
   const copy = async () => {
     window.history.replaceState(null, '', url);
     const ok = await copyText(url);
     if (ok) {
       setCopied(true);
       notify('Share link copied');
-      window.setTimeout(() => setCopied(false), 2200);
+      if (copyTimer.current) window.clearTimeout(copyTimer.current);
+      copyTimer.current = window.setTimeout(() => setCopied(false), 2200);
     } else {
-      notify('Copy failed — select the link and copy it manually.');
+      notify('Copy failed — select the link and copy it manually.', 'error');
     }
   };
 
@@ -60,8 +68,28 @@ export function ShareDialog({
             value={url}
             onFocus={(event) => event.currentTarget.select()}
           />
-          <button type="button" className="btn btn--sm" onClick={copy} data-autofocus>
-            {copied ? 'Copied' : 'Copy link'}
+          <button
+            type="button"
+            className={`btn btn--sm${copied ? ' is-copied' : ''}`}
+            onClick={copy}
+            data-autofocus
+          >
+            {copied ? (
+              <>
+                <svg viewBox="0 0 16 16" width="11" height="11" fill="none" aria-hidden="true">
+                  <path
+                    d="m3 8.5 3.4 3.4L13 4.6"
+                    stroke="currentColor"
+                    strokeWidth="1.7"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+                Copied
+              </>
+            ) : (
+              'Copy link'
+            )}
           </button>
         </div>
         <p className="share__length mono">{url.length.toLocaleString()} characters · no server involved</p>

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState } from 'react';
 import { FAMILIES, presetsByFamily } from '../../lib/motion/presets';
 import type { Preset } from '../../lib/motion/types';
 import type { SavedDocument } from '../../lib/storage';
@@ -41,7 +41,18 @@ interface LibraryProps {
   onDeleteSave: (presetId: string) => void;
 }
 
-export function Library({ activeId, onSelect, saves, onLoadSave, onDeleteSave }: LibraryProps) {
+/*
+ * The library holds every preset heading. Its props only change when the
+ * selected preset or the saved list changes, so it can skip the renders that
+ * a slider drag would otherwise cause.
+ */
+export const Library = memo(function Library({
+  activeId,
+  onSelect,
+  saves,
+  onLoadSave,
+  onDeleteSave,
+}: LibraryProps) {
   const [query, setQuery] = useState('');
   const groups = useMemo(
     () =>
@@ -189,4 +200,4 @@ export function Library({ activeId, onSelect, saves, onLoadSave, onDeleteSave }:
       </div>
     </div>
   );
-}
+});

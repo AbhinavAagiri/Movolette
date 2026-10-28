@@ -2,16 +2,24 @@ import { useEffect, useState } from 'react';
 
 export type Route =
   | { name: 'landing' }
-  | { name: 'studio'; search: URLSearchParams };
+  | { name: 'studio'; search: URLSearchParams }
+  | { name: 'notFound' };
 
+/**
+ * Routes live in the hash because the app is served as static files. Only
+ * `#/...` addresses are routes; `#explore` and similar remain section anchors.
+ */
 export function parseHash(hash: string): Route {
-  const cleaned = hash.replace(/^#\/?/, '');
-  if (cleaned.startsWith('studio')) {
-    const question = cleaned.indexOf('?');
-    const search = new URLSearchParams(question >= 0 ? cleaned.slice(question + 1) : '');
+  if (!hash.startsWith('#/')) return { name: 'landing' };
+  const path = hash.slice(2);
+  if (!path || path === '/') return { name: 'landing' };
+  const question = path.indexOf('?');
+  const name = question >= 0 ? path.slice(0, question) : path;
+  if (name === 'studio') {
+    const search = new URLSearchParams(question >= 0 ? path.slice(question + 1) : '');
     return { name: 'studio', search };
   }
-  return { name: 'landing' };
+  return { name: 'notFound' };
 }
 
 export function studioHash(params?: { preset?: string; share?: string }): string {

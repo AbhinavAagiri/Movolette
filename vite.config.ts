@@ -9,5 +9,9 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     target: 'es2020',
+    // Never ship .map files next to the bundle. This keeps the deployed dist
+    // folder to the code that actually runs; it is not a security boundary,
+    // since minified client code is still readable in the browser.
+    sourcemap: false,
   },
 });

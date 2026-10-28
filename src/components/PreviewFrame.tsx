@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { memo, useEffect, useMemo, useRef } from 'react';
 import { buildPreviewDocument } from '../lib/preview';
 import type { StudioDocument } from '../lib/motion/types';
 
@@ -12,7 +12,11 @@ export interface PreviewFrameProps {
   style?: React.CSSProperties;
 }
 
-export function PreviewFrame({
+/*
+ * The generated document only changes when the (debounced) document does, so
+ * the frame can skip re-rendering while the inspector is being dragged.
+ */
+export const PreviewFrame = memo(function PreviewFrame({
   doc,
   title,
   demo = true,
@@ -46,9 +50,9 @@ export function PreviewFrame({
       className={`preview-frame${className ? ` ${className}` : ''}`}
       title={title}
       srcDoc={html}
-      sandbox="allow-scripts allow-same-origin"
+      sandbox="allow-scripts"
       onLoad={sendState}
       style={style}
     />
   );
-}
+});

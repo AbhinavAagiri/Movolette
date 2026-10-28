@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { buildExportBundle } from '../../lib/preview';
 import type { StudioDocument } from '../../lib/motion/types';
 import { copyText, downloadText } from '../../lib/clipboard';
@@ -20,33 +20,57 @@ const TAB_LABELS: Record<ExportTab, string> = {
   js: 'JavaScript',
 };
 
+/*
+ * The stylesheet build is only useful while the dialog is open, so the body
+ * is a separate component that mounts with it. Keeping it mounted would
+ * rebuild the export bundle on every inspector tick behind a closed dialog.
+ */
 export function ExportPanel({ open, onClose, doc }: ExportPanelProps) {
+  if (!open) return null;
+  return <ExportPanelBody onClose={onClose} doc={doc} />;
+}
+
+function ExportPanelBody({ onClose, doc }: Omit<ExportPanelProps, 'open'>) {
   const [tab, setTab] = useState<ExportTab>('css');
+  const [copied, setCopied] = useState(false);
+  const copyTimer = useRef<number | null>(null);
   const notify = useToast();
   const bundle = useMemo(() => buildExportBundle(doc), [doc]);
   const hasJs = bundle.js.trim().length > 0;
   const filename = `movolette-${doc.presetId}.css`;
 
   useEffect(() => {
-    if (open) setTab('css');
-  }, [open]);
+    return () => {
+      if (copyTimer.current) window.clearTimeout(copyTimer.current);
+    };
+  }, []);
 
   const code = tab === 'css' ? bundle.css : tab === 'html' ? bundle.html : bundle.js;
   const language = tab === 'js' ? 'js' : tab;
 
   const copyCurrent = async () => {
     const ok = await copyText(code);
-    notify(ok ? `${TAB_LABELS[tab]} copied to clipboard` : 'Copy failed — select the code and copy it manually.');
+    if (!ok) {
+      notify('Copy failed — select the code and copy it manually.', 'error');
+      return;
+    }
+    setCopied(true);
+    if (copyTimer.current) window.clearTimeout(copyTimer.current);
+    copyTimer.current = window.setTimeout(() => setCopied(false), 1800);
+    notify(`${TAB_LABELS[tab]} copied to clipboard`);
   };
 
   const downloadCss = () => {
     const ok = downloadText(filename, bundle.css, 'text/css');
-    notify(ok ? `Downloaded ${filename}` : 'Download failed. You can copy the CSS instead.');
+    notify(
+      ok ? `Downloaded ${filename}` : 'Download failed. You can copy the CSS instead.',
+      ok ? 'success' : 'error',
+    );
   };
 
   return (
     <Dialog
-      open={open}
+      open
       onClose={onClose}
       variant="wide"
       eyebrow="Export code"
@@ -75,7 +99,10 @@ export function ExportPanel({ open, onClose, doc }: ExportPanelProps) {
               aria-selected={tab === entry}
               aria-controls={`export-code-${entry}`}
               className={`export__tab${tab === entry ? ' is-active' : ''}`}
-              onClick={() => setTab(entry)}
+              onClick={() => {
+                setTab(entry);
+                setCopied(false);
+              }}
             >
               {TAB_LABELS[entry]}
               {entry === 'js' && !hasJs ? <span className="export__tab-note">none needed</span> : null}
@@ -96,8 +123,28 @@ export function ExportPanel({ open, onClose, doc }: ExportPanelProps) {
 
         <div className="export__actions">
           <div className="export__action-group">
-            <button type="button" className="btn btn--sm" onClick={copyCurrent} disabled={tab === 'js' && !hasJs}>
-              Copy {TAB_LABELS[tab]}
+            <button
+              type="button"
+              className={`btn btn--sm${copied ? ' is-copied' : ''}`}
+              onClick={copyCurrent}
+              disabled={tab === 'js' && !hasJs}
+            >
+              {copied ? (
+                <>
+                  <svg viewBox="0 0 16 16" width="11" height="11" fill="none" aria-hidden="true">
+                    <path
+                      d="m3 8.5 3.4 3.4L13 4.6"
+                      stroke="currentColor"
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                  Copied
+                </>
+              ) : (
+                `Copy ${TAB_LABELS[tab]}`
+              )}
             </button>
             <button type="button" className="btn btn--ghost btn--sm" onClick={downloadCss}>
               Download CSS

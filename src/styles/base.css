@@ -400,6 +400,18 @@ svg {
   box-shadow: none;
 }
 
+/* Transient confirmation for a copy action, before the toast settles. */
+.btn.is-copied {
+  --btn-bg: var(--violet-wash);
+  --btn-fg: var(--violet);
+  --btn-bd: var(--violet);
+}
+
+.btn.is-copied:hover {
+  background: var(--violet-wash);
+  box-shadow: none;
+}
+
 .btn[disabled] {
   opacity: 0.45;
   cursor: not-allowed;

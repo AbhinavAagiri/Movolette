@@ -235,6 +235,12 @@ export function decodeShare(token: string): ShareResult {
   if (!token || token.length > 12000) {
     return { ok: false, error: 'That link is empty or too large to read.' };
   }
+  // Links are encoded as base64url by encodeDocument. Reject anything else
+  // before atob() so a hand-edited URL fails with a clear message instead of
+  // relying on the decoder's tolerance for stray characters.
+  if (!/^[A-Za-z0-9_-]+$/.test(token)) {
+    return { ok: false, error: 'That link does not contain a readable animation.' };
+  }
   let payload: unknown;
   try {
     payload = JSON.parse(fromBase64Url(token));

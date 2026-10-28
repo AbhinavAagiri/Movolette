@@ -38,6 +38,12 @@
   margin-top: 7px;
 }
 
+/* Failures read differently at a glance, and are announced assertively. */
+.app-toast[data-tone='error'] .app-toast__dot {
+  background: transparent;
+  box-shadow: inset 0 0 0 2px var(--coral);
+}
+
 /* ---------- Dialog ---------- */
 
 .dialog-layer {
