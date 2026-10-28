@@ -10,9 +10,20 @@ interface DialogProps {
   children: ReactNode;
   variant?: 'center' | 'wide' | 'drawer';
   description?: string;
+  /** Extra classes on the panel, for one-off treatments such as the legal pop. */
+  panelClassName?: string;
 }
 
-export function Dialog({ open, onClose, title, eyebrow, children, variant = 'center', description }: DialogProps) {
+export function Dialog({
+  open,
+  onClose,
+  title,
+  eyebrow,
+  children,
+  variant = 'center',
+  description,
+  panelClassName,
+}: DialogProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const descriptionId = useId();
@@ -72,7 +83,7 @@ export function Dialog({ open, onClose, title, eyebrow, children, variant = 'cen
       <button type="button" className="dialog-backdrop" aria-label="Close dialog" onClick={onClose} tabIndex={-1} />
       <div
         ref={panelRef}
-        className={`dialog dialog--${variant}`}
+        className={`dialog dialog--${variant}${panelClassName ? ` ${panelClassName}` : ''}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}

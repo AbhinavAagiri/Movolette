@@ -1,9 +1,14 @@
+import { useCallback, useState } from 'react';
 import { studioHash } from '../../lib/router';
 import { Wordmark } from '../Mark';
 import { Reveal } from '../Reveal';
 import { SiteCredit } from '../SiteCredit';
+import { PrivacyDialog } from './PrivacyDialog';
 
 export function FinalCta() {
+  const [legalOpen, setLegalOpen] = useState(false);
+  const closeLegal = useCallback(() => setLegalOpen(false), []);
+
   return (
     <>
       <section className="cta" aria-labelledby="cta-title">
@@ -57,12 +62,21 @@ export function FinalCta() {
           <Reveal className="footer__meta" delay={140} shift="none">
             <span className="mono">SAVED LOCALLY · NO ACCOUNT</span>
             <span className="mono">© 2026 MOVOLETTE</span>
+            <button
+              type="button"
+              className="footer__legal mono"
+              aria-haspopup="dialog"
+              onClick={() => setLegalOpen(true)}
+            >
+              [Privacy &amp; Terms]
+            </button>
           </Reveal>
         </div>
         <div className="container footer__credit">
           <SiteCredit />
         </div>
       </footer>
+      <PrivacyDialog open={legalOpen} onClose={closeLegal} />
     </>
   );
 }

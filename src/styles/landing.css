@@ -1203,6 +1203,19 @@
   color: var(--muted);
 }
 
+.footer__meta .footer__legal {
+  padding: 5px 2px;
+  font-size: 7.5px;
+  letter-spacing: 0.09em;
+  color: var(--muted-deep);
+  transition: color 160ms ease;
+}
+
+.footer__meta .footer__legal:hover,
+.footer__meta .footer__legal:focus-visible {
+  color: var(--violet);
+}
+
 @media (max-width: 1180px) {
   .explore__stage {
     top: calc(var(--nav-h) + 16px);
